@@ -1,0 +1,14 @@
+RadiantUploadManager
+====================
+
+Radiant Upload Manager is an extension for Radiant CMS to enable the admin upload multiple files at once in a handy queue.
+
+After installing the extension to you Radiant project:
+======================================================
+- run the update rake task
+
+	>> rake radiant:extensions:upload_manager:update RAILS_ENV=production
+
+- You'll find an extra "Upload Manager" tab in the admin interface. Files that admin upload go under /public/uploads/File
+
+===========================================================================
