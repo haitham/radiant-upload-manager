@@ -1,0 +1,94 @@
+<script type="text/javascript" src="/swfupload/swfupload.js"></script>
+<script type="text/javascript" src="/swfupload/plugins/swfupload.queue.js"></script>
+<script type="text/javascript">
+	var uploader;
+	
+	window.onload = function() {
+		var settings = {
+			flash_url : "/swfupload/Flash8/swfupload_f8.swf",
+			upload_url: "/files/upload",
+			file_size_limit : "500 MB",
+			file_types : "*.*",
+			file_types_description : "All Files",
+			file_upload_limit : 100,
+			file_queue_limit : 0,
+			custom_settings : {
+				progressTarget : "fsUploadProgress",
+				cancelButtonId : "btnCancel"
+			},
+			debug: false,
+
+			file_queued_handler : fileQueued,
+			file_dialog_complete_handler : fileDialogComplete,
+			upload_start_handler : uploadStart,
+			upload_progress_handler : uploadProgress,
+			upload_error_handler : uploadError,
+			upload_success_handler : uploadSuccess
+		};
+
+		uploader = new SWFUpload(settings);
+		
+	};
+	
+	fileDialogComplete = function(numberSelected, numberQueued){
+		uploader.startUpload();
+		$('cancel_upload').disabled = false;
+	}
+	
+	fileQueued = function(file){
+		$("upload_queue").innerHTML = $("upload_queue").innerHTML + "<p id='queue_entry_" + file.id + "'> <span class='upload-fileName'>" + file.name + "</span> <span class='upload-fileSize'>" + Math.ceil(file.size/1024) + " KB</span> <span class='upload-fileStatus' id='upload_status_" + file.id + "'>Pending</span> </p>"
+	}
+	uploadStart = function(file){
+		$('upload_status_' + file.id).innerHTML = "Uploading 0%";
+		$('queue_entry_' + file.id).className = "uploading";
+	}
+	
+	uploadProgress = function(file, bytesUploaded, bytesTotal){
+		$('upload_status_' + file.id).innerHTML = "Uploading " + Math.ceil(100*bytesUploaded/bytesTotal) + "%";
+	}
+	
+	uploadError = function(file, code, message){
+		if (code == SWFUpload.UPLOAD_ERROR.FILE_CANCELLED){
+			$('upload_status_' + file.id).innerHTML = "Cancelled";
+			$('queue_entry_' + file.id).className = "cancelled";
+		}else if (code == SWFUpload.UPLOAD_ERROR.UPLOAD_STOPPED){
+			$('upload_status_' + file.id).innerHTML = "Stopped";
+			$('queue_entry_' + file.id).className = "cancelled";
+		}else{
+			alert("An error occurred uploading " + file.name + "\n" + message);
+		}
+	}
+	
+	uploadSuccess = function(file, serverData){
+		$('upload_status_' + file.id).innerHTML = "Done";
+		$('files_completed').innerHTML = parseInt($('files_completed').innerHTML) + 1;
+		$('queue_entry_' + file.id).className = "done";
+		new Effect.Highlight("queue_entry_" + file.id);
+	}
+</script>
+
+<style>
+h3{background:#f5f1e2; margin:20px 20px 10px 20px; border:1px solid #cdc295; font-size:1.4em; padding:10px;}
+.upload-content{background:#f5f1e2; margin:0px 20px; border:1px solid #cdc295;}
+.upload-content p{margin:3px 5px; background:#FFFFFF; padding:10px; border:1px solid #cdc295; font-size:0.9em; clear:both}
+.upload-content p.done{background:#e9ffd2; color:#2d8a00;}
+.upload-content p.uploading{background:#fffee7;}
+.upload-content p.cancelled{background:#fff4ef; color:#c12d00;}
+
+.upload-fileName{font-weight:bold;}
+.upload-fileSize{ width:100px; text-align:right;color:#666666; font-size:0.9em;}
+.upload-fileStatus{ width:180px; text-align:right; float:right; margin:-20px 10px 0px 0px; display:inline;}
+.upload-message{ padding:10px 0px 10px 20px; clear:both; background:#feffce;border:1px solid #fff177; margin:10px 20px;}
+</style>
+
+<div id="content">
+		<div>
+			<h3>Upload Queue</h3>
+			<div id="upload_queue" class="upload-content"></div>
+		</div>
+		<div class="upload-message"><span id="files_completed">0</span> Files Uploaded</div>
+		<div class="buttons" style="margin-left:20px;">
+			<input type="button" value="Browse" onclick="uploader.selectFiles()" class="button" />
+			<input id="cancel_upload" type="button" value="Cancel All Uploads" onclick="uploader.cancelQueue();" disabled="disabled" class="button" />
+		</div>
+</div>
