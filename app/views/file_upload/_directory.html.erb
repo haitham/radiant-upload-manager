@@ -1,0 +1,10 @@
+<% path = File.join(dir, filename)%>
+<%unless filename == "." or filename == ".." or filename == ".svn" %>
+<p id="directory_<%=filename%>">
+	<% if FileTest.directory? path %>
+	<a href="#" onclick="browse('<%=path%>')"><%=filename%></a>
+	<% else %>
+	<span><%=filename%><img src="/images/admin/delete.gif" alt="Delete" onclick="deleteFile('<%=dir%>', '<%=filename%>');" title="delete"/></span>
+	<% end %>
+</p>
+<%end%>

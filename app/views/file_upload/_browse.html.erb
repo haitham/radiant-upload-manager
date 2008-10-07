@@ -1,0 +1,23 @@
+<script>
+	currentPath = '<%=@dir%>'
+</script>
+<div id='browse_dialog'>
+	<h3>Save to: <%=@save_to%></h3>
+	<div>
+		<% unless @dir == "#{RAILS_ROOT}/public" or @dir == "#{RAILS_ROOT}/public/" %>
+		<p id="parent_dir">
+			<a href="#" onclick="browse('<%=@parent%>')">Up</a>
+		</p>
+		<% end %>
+		
+		<div id="dir_entries">
+			<% Dir.new(@dir).each do |filename| %>
+			<%=render :partial => 'directory', :locals => {:dir => @dir, :filename => filename}%>
+			<% end %>
+		</div>
+		
+		<p id="new_dir">
+			<a href="#" onclick="newFolder('<%=@dir%>')">New Folder</a>
+		</p>
+	</div>
+</div>

@@ -1,7 +1,16 @@
 <script type="text/javascript" src="/swfupload/swfupload.js"></script>
 <script type="text/javascript" src="/swfupload/plugins/swfupload.queue.js"></script>
 <script type="text/javascript">
+	Ajax.Responders.register({
+	  onCreate: function() {
+	    document.body.style.cursor = 'progress';
+	  },
+	  onComplete: function() {
+	    document.body.style.cursor = '';
+	  }
+	});
 	var uploader;
+	var currentPath = "#{RAILS_ROOT}/public/uploads"
 	
 	window.onload = function() {
 		var settings = {
@@ -19,6 +28,7 @@
 			debug: false,
 
 			file_queued_handler : fileQueued,
+			file_dialog_start_handler: fileDialogStart,
 			file_dialog_complete_handler : fileDialogComplete,
 			upload_start_handler : uploadStart,
 			upload_progress_handler : uploadProgress,
@@ -29,6 +39,12 @@
 		uploader = new SWFUpload(settings);
 		
 	};
+	
+	fileDialogStart = function(){
+		uploader.removePostParam('path');
+		uploader.addPostParam('path', currentPath);
+		//uploader.settings.upload_url = "/files/upload?path=" + currentPath;
+	}
 	
 	fileDialogComplete = function(numberSelected, numberQueued){
 		uploader.startUpload();
@@ -65,23 +81,152 @@
 		$('queue_entry_' + file.id).className = "done";
 		new Effect.Highlight("queue_entry_" + file.id);
 	}
+	
+	browse = function(path){
+		new Ajax.Request("/files/browse", {
+			method: 'get',
+			parameters: {'path': path}
+		});
+	}
+	
+	newFolder = function(path){
+		folderName = prompt("Folder name:");
+		if (folderName == ""){
+			return false;
+		}
+		new Ajax.Request("/files/new_folder", {
+			method: 'post',
+			parameters: {'path': path, 'folder_name': folderName},
+			evalScript: true
+		});
+	}
+	
+	deleteFile = function(path, file){
+		new Ajax.Request("/files/delete", {
+			method: 'post',
+			parameters: {'path': path, 'file': file},
+			evalScript: true
+		});
+	}
+	
 </script>
 
 <style>
-h3{background:#f5f1e2; margin:20px 20px 10px 20px; border:1px solid #cdc295; font-size:1.4em; padding:10px;}
-.upload-content{background:#f5f1e2; margin:0px 20px; border:1px solid #cdc295;}
-.upload-content p{margin:3px 5px; background:#FFFFFF; padding:10px; border:1px solid #cdc295; font-size:0.9em; clear:both}
-.upload-content p.done{background:#e9ffd2; color:#2d8a00;}
-.upload-content p.uploading{background:#fffee7;}
-.upload-content p.cancelled{background:#fff4ef; color:#c12d00;}
+body{font-family:Arial, Helvetica, sans-serif;}
+h3 {
+background:#f5f1e2;
+margin:20px 20px 10px 20px;
+border:1px solid #cdc295;
+font-size:1.4em;
+padding:10px;
+}
+.upload-content {
+background:#f5f1e2;
+margin:0px 20px;
+border:1px solid #cdc295;
+}
+.upload-content p {
+margin:3px 5px;
+background:#FFFFFF;
+padding:10px;
+border:1px solid #cdc295;
+font-size:0.9em;
+clear:both
+}
+.upload-content p.done {
+background:#e9ffd2;
+color:#2d8a00;
+}
+.upload-content p.uploading {
+background:#fffee7;
+}
+.upload-content p.cancelled {
+background:#fff4ef;
+color:#c12d00;
+}
+.upload-fileName {
+font-weight:bold;
+}
+.upload-fileSize {
+width:100px;
+text-align:right;
+color:#666666;
+font-size:0.9em;
+}
+.upload-fileStatus {
+width:180px;
+text-align:right;
+float:right;
+margin:-20px 10px 0px 0px;
+display:inline;
+}
+.upload-message {
+padding:10px 0px 10px 20px;
+clear:both;
+background:#feffce;
+border:1px solid #fff177;
+margin:10px 20px;
+}
+#parent_dir{
+margin:3px 20px;
+border-bottom:1px solid #CCCCCC;
+font-size:0.9em;
+}
+#parent_dir A{
+background:url(../../images/admin/up.gif) no-repeat 5px 5px;
+padding:5px 0px 5px 25px;
+display:block;
+color:#000000;
+text-decoration:none;
+font-weight:bold;
+}
+#parent_dir A:hover{
+background:url(../../images/admin/up.gif) no-repeat 5px 5px #F0F0F0;
+}
 
-.upload-fileName{font-weight:bold;}
-.upload-fileSize{ width:100px; text-align:right;color:#666666; font-size:0.9em;}
-.upload-fileStatus{ width:180px; text-align:right; float:right; margin:-20px 10px 0px 0px; display:inline;}
-.upload-message{ padding:10px 0px 10px 20px; clear:both; background:#feffce;border:1px solid #fff177; margin:10px 20px;}
+#new_dir{
+margin:20px 20px;
+border-top:1px solid #CCCCCC;
+font-size:0.9em;
+}
+#new_dir A{
+background:url(../../images/admin/newDirectory.gif) no-repeat 5px 5px;
+padding:5px 0px 5px 25px;
+display:block;
+color:#000000;
+text-decoration:none;
+font-weight:bold;
+}
+#new_dir A:hover{
+background:url(../../images/admin/newDirectory.gif) no-repeat 5px 5px #F0F0F0;
+}
+
+#dir_entries p{
+margin:5px 20px;
+font-size:0.9em;
+}
+#dir_entries p a{
+background:url(../../images/admin/directory.gif) no-repeat 2px 3px;
+padding:2px 5px 2px 22px;
+font-weight:bold;
+}
+#dir_entries p a:hover{
+text-decoration:none;
+background:url(../../images/admin/directory.gif) no-repeat 2px 3px #F0F0F0;
+}
+#dir_entries p span{
+display:block;
+background:url(../../images/admin/file.gif) no-repeat 2px 3px;
+padding:2px 5px 2px 22px;
+}
+#dir_entries p span img{
+vertical-align:middle;
+cursor:pointer;
+margin:1px 0px 0px 4px;
 </style>
 
-<div id="content">
+<%= render :partial => 'browse' %>
+<div>
 		<div>
 			<h3>Upload Queue</h3>
 			<div id="upload_queue" class="upload-content"></div>
