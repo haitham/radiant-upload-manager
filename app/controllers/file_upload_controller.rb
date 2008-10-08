@@ -5,7 +5,7 @@ class FileUploadController < ApplicationController
   skip_before_filter :set_current_user
   
   def upload
-	unless params[:path] =~ /public/
+	unless params[:path] =~ /uploads/
 		render :nothing, :status => :forbidden
 		return false
 	end
@@ -27,13 +27,19 @@ class FileUploadController < ApplicationController
   end
   
   def index
+	begin
+		Dir.new "#{RAILS_ROOT}/public/uploads"
+	rescue
+		FileUtils.mkdir "#{RAILS_ROOT}/public/uploads"
+	end
+	
 	@dir = "#{RAILS_ROOT}/public/uploads"
 	@save_to = "/public/uploads"
 	@parent = "#{RAILS_ROOT}/public"
   end
   
   def browse
-	unless params[:path] =~ /public/
+	unless params[:path] =~ /uploads/
 		render :nothing, :status => :forbidden
 		return false
 	end
@@ -59,7 +65,7 @@ class FileUploadController < ApplicationController
   end
   
   def new_folder
-	unless params[:path] =~ /public/
+	unless params[:path] =~ /uploads/
 		render :nothing, :status => :forbidden
 		return false
 	end
@@ -83,7 +89,7 @@ class FileUploadController < ApplicationController
   end
   
   def destroy
-	unless params[:path] =~ /public/
+	unless params[:path] =~ /uploads/
 		render :nothing, :status => :forbidden
 		return false
 	end

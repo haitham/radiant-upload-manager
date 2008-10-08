@@ -4,7 +4,7 @@
 	<% if FileTest.directory? path %>
 	<a href="#" onclick="browse('<%=path%>')"><%=filename%></a>
 	<% else %>
-	<span><%=filename%><img src="/images/admin/delete.gif" alt="Delete" onclick="deleteFile('<%=dir%>', '<%=filename%>');" title="delete"/></span>
+	<span class="file_link" style="cursor:pointer;" onclick="window.open('<%=File.join(@save_to.sub("/public", ""),filename)%>');"><%=filename%><img src="/images/admin/delete.gif" alt="Delete" onclick="deleteFile('<%=dir%>', '<%=filename%>');" title="delete"/></span>
 	<% end %>
 </p>
 <%end%>
